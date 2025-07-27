@@ -19,15 +19,19 @@ else
     echo "✅ clippy is installed"
 fi
 
-# Check if dprint is installed
-if ! command -v dprint &> /dev/null; then
-    echo "❌ dprint not found. Please install it:"
-    echo "   curl -fsSL https://dprint.dev/install.sh | sh"
-    echo "   or"
-    echo "   cargo install dprint"
-    exit 1
+# Check if dprint is installed (skip in CI environment)
+if [ "$CI" != "true" ]; then
+    if ! command -v dprint &> /dev/null; then
+        echo "❌ dprint not found. Please install it:"
+        echo "   curl -fsSL https://dprint.dev/install.sh | sh"
+        echo "   or"
+        echo "   cargo install dprint"
+        exit 1
+    else
+        echo "✅ dprint is installed"
+    fi
 else
-    echo "✅ dprint is installed"
+    echo "ℹ️  Skipping dprint check in CI environment"
 fi
 
 echo "All tools are ready!"
