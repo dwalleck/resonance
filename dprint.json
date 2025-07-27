@@ -31,6 +31,9 @@
   "markup": {
     "indentWidth": 2
   },
+  "yaml": {
+    "indentWidth": 2
+  },
   "includes": [
     "**/*.{ts,tsx,js,jsx,mjs,cjs}",
     "**/*.json",
@@ -60,6 +63,7 @@
     "https://plugins.dprint.dev/markdown-0.16.0.wasm",
     "https://plugins.dprint.dev/toml-0.5.4.wasm",
     "https://plugins.dprint.dev/g-plane/malva-v0.14.1.wasm",
-    "https://plugins.dprint.dev/g-plane/markup_fmt-v0.23.1.wasm"
+    "https://plugins.dprint.dev/g-plane/markup_fmt-v0.23.1.wasm",
+    "https://plugins.dprint.dev/g-plane/pretty_yaml-v0.5.1.wasm"
   ]
 }
