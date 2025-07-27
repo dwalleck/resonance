@@ -1,0 +1,22 @@
+{
+  "*.{ts,tsx,js,jsx}": [
+    "eslint --fix --max-warnings 0",
+    "dprint fmt"
+  ],
+  "*.rs": [
+    "rustfmt --edition 2021",
+    "cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings"
+  ],
+  "*.toml": [
+    "dprint fmt"
+  ],
+  "*.{json,md,yml,yaml}": [
+    "dprint fmt"
+  ],
+  "*.{css,scss}": [
+    "dprint fmt"
+  ],
+  "*.html": [
+    "dprint fmt"
+  ]
+}
