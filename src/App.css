@@ -1,19 +1,8 @@
-.container {
-  margin: 0;
-  padding-top: 10vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
 h1 {
   margin-bottom: 2rem;
 }
 
 .row {
-  display: flex;
-  justify-content: center;
   margin: 2rem 0;
 }
 
