@@ -2,55 +2,55 @@
 
 frontend:
   - changed-files:
-    - any-glob-to-any-file:
-      - 'src/**/*.{ts,tsx,js,jsx}'
-      - 'src/**/*.css'
-      - 'index.html'
-      - 'vite.config.ts'
+      - any-glob-to-any-file:
+          - "src/**/*.{ts,tsx,js,jsx}"
+          - "src/**/*.css"
+          - "index.html"
+          - "vite.config.ts"
 
 backend:
   - changed-files:
-    - any-glob-to-any-file:
-      - 'src-tauri/**/*.rs'
-      - 'src-tauri/**/Cargo.toml'
+      - any-glob-to-any-file:
+          - "src-tauri/**/*.rs"
+          - "src-tauri/**/Cargo.toml"
 
 ffi:
   - changed-files:
-    - any-glob-to-any-file:
-      - 'src-tauri/src/ryzenadj/**'
-      - 'lib/RyzenAdj/**'
+      - any-glob-to-any-file:
+          - "src-tauri/src/ryzenadj/**"
+          - "lib/RyzenAdj/**"
 
 testing:
   - changed-files:
-    - any-glob-to-any-file:
-      - '**/*.test.{ts,tsx,js}'
-      - '**/*.spec.{ts,tsx,js}'
-      - '**/tests/**'
-      - 'vitest.config.ts'
-      - 'src/test/**'
+      - any-glob-to-any-file:
+          - "**/*.test.{ts,tsx,js}"
+          - "**/*.spec.{ts,tsx,js}"
+          - "**/tests/**"
+          - "vitest.config.ts"
+          - "src/test/**"
 
 docs:
   - changed-files:
-    - any-glob-to-any-file:
-      - '**/*.md'
-      - 'docs/**'
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - "docs/**"
 
 build:
   - changed-files:
-    - any-glob-to-any-file:
-      - '.github/workflows/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'tsconfig.json'
-      - '.eslintrc.json'
-      - 'dprint.json'
-      - 'rustfmt.toml'
-      - 'build.rs'
+      - any-glob-to-any-file:
+          - ".github/workflows/**"
+          - "package.json"
+          - "package-lock.json"
+          - "tsconfig.json"
+          - ".eslintrc.json"
+          - "dprint.json"
+          - "rustfmt.toml"
+          - "build.rs"
 
 dependencies:
   - changed-files:
-    - any-glob-to-any-file:
-      - 'package.json'
-      - 'package-lock.json'
-      - '**/Cargo.toml'
-      - '**/Cargo.lock'
+      - any-glob-to-any-file:
+          - "package.json"
+          - "package-lock.json"
+          - "**/Cargo.toml"
+          - "**/Cargo.lock"

@@ -72,16 +72,16 @@ jobs:
         with:
           script: |
             const comment = `### 📦 Dependency Changes Detected
-            
+
             ${steps['npm-changes'].outputs.package === 'true' ? '- NPM dependencies have been modified' : ''}
             ${steps['cargo-changes'].outputs.cargo === 'true' ? '- Rust dependencies have been modified' : ''}
-            
+
             Please ensure:
             - [ ] Security audit has been run
             - [ ] New dependencies are necessary
             - [ ] Licenses are compatible
             `;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -100,8 +100,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
