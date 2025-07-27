@@ -1,0 +1,117 @@
+name: Pull Request
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  # Check PR title follows conventional commits
+  pr-title:
+    name: Validate PR Title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            chore
+            build
+            ci
+            revert
+          requireScope: false
+
+  # Label PR based on files changed
+  label:
+    name: Auto Label PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+
+  # Check for dependency changes
+  dependencies:
+    name: Check Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for package.json changes
+        uses: dorny/paths-filter@v3
+        id: npm-changes
+        with:
+          filters: |
+            package:
+              - 'package.json'
+              - 'package-lock.json'
+
+      - name: Check for Cargo.toml changes
+        uses: dorny/paths-filter@v3
+        id: cargo-changes
+        with:
+          filters: |
+            cargo:
+              - '**/Cargo.toml'
+              - '**/Cargo.lock'
+
+      - name: Comment on dependency changes
+        if: steps.npm-changes.outputs.package == 'true' || steps.cargo-changes.outputs.cargo == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `### 📦 Dependency Changes Detected
+            
+            ${steps['npm-changes'].outputs.package === 'true' ? '- NPM dependencies have been modified' : ''}
+            ${steps['cargo-changes'].outputs.cargo === 'true' ? '- Rust dependencies have been modified' : ''}
+            
+            Please ensure:
+            - [ ] Security audit has been run
+            - [ ] New dependencies are necessary
+            - [ ] Licenses are compatible
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # Size check
+  size:
+    name: Bundle Size Check
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Check bundle size
+        uses: andresz1/size-limit-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          skip_step: build
+        continue-on-error: true

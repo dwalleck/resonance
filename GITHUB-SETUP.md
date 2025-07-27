@@ -7,12 +7,12 @@ labels, issues, and development workflow.
 
 ```bash
 # Create the repository (if using GitHub CLI)
-gh repo create dwalleck/frequency --public \
+gh repo create resonance --public \
   --description "Modern cross-platform GUI for RyzenAdj built with Tauri and React" \
-  --homepage "https://github.com/dwalleck/frequency"
+  --homepage "https://github.com/dwalleck/resonance"
 
 # Clone and set up
-git remote add origin https://github.com/dwalleck/frequency.git
+git remote add origin https://github.com/dwalleck/resonance.git
 git branch -M main
 git push -u origin main
 ```
@@ -163,8 +163,8 @@ print("=" * 50)
 
 ```bash
 # Create a project board
-gh project create --title "Frequency Development" \
-  --description "Development tracking for Frequency"
+gh project create --title "resonance Development" \
+  --description "Development tracking for resonance"
 
 # Link repository to project
 # (This needs to be done via web UI or API)
@@ -176,7 +176,7 @@ gh project create --title "Frequency Development" \
 
 ```bash
 # Set up branch protection for main
-gh api repos/dwalleck/frequency/branches/main/protection \
+gh api repos/dwalleck/resonance/branches/main/protection \
   --method PUT \
   --field required_status_checks='{"strict":true,"contexts":["continuous-integration"]}' \
   --field enforce_admins=false \
@@ -187,7 +187,7 @@ gh api repos/dwalleck/frequency/branches/main/protection \
 ### Repository Topics
 
 ```bash
-gh repo edit dwalleck/frequency --add-topic tauri,react,rust,amd,ryzen,power-management
+gh repo edit dwalleck/resonance --add-topic tauri,react,rust,amd,ryzen,power-management
 ```
 
 ## 6. Initial Commit Structure

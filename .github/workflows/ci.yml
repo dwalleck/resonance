@@ -1,0 +1,291 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  RUST_BACKTRACE: 1
+
+jobs:
+  # Check formatting first (fast fail)
+  format:
+    name: Check Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dprint
+        run: |
+          curl -fsSL https://dprint.dev/install.sh | sh
+          echo "$HOME/.dprint/bin" >> $GITHUB_PATH
+
+      - name: Check Rust formatting
+        run: cargo fmt -- --check
+        working-directory: ./src-tauri
+
+      - name: Check TypeScript/JSON formatting
+        run: dprint check
+
+  # Lint code
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint TypeScript
+        run: npm run lint
+
+      - name: TypeScript type check
+        run: npm run type-check
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Lint Rust
+        run: cargo clippy -- -D warnings
+        working-directory: ./src-tauri
+
+  # Test on multiple platforms
+  test:
+    name: Test - ${{ matrix.platform.name }}
+    needs: [format, lint]
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: Linux
+            runner: ubuntu-latest
+            rust-target: x86_64-unknown-linux-gnu
+          - name: Windows
+            runner: windows-latest
+            rust-target: x86_64-pc-windows-msvc
+          - name: macOS
+            runner: macos-latest
+            rust-target: x86_64-apple-darwin
+
+    runs-on: ${{ matrix.platform.runner }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform.rust-target }}
+
+      - name: Install Linux dependencies
+        if: matrix.platform.name == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libwebkit2gtk-4.0-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Cache Node modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-test-
+            ${{ runner.os }}-cargo-
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Run frontend tests
+        run: npm test -- --run
+
+      - name: Run frontend test coverage
+        run: npm test -- --run --coverage
+
+      - name: Run Rust tests
+        run: cargo test --workspace
+        working-directory: ./src-tauri
+
+      - name: Upload coverage reports
+        if: matrix.platform.name == 'Linux'
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/coverage-final.json
+          flags: frontend
+          name: frontend-coverage
+
+  # Build on multiple platforms
+  build:
+    name: Build - ${{ matrix.platform.name }}
+    needs: [format, lint]
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: Linux
+            runner: ubuntu-latest
+            rust-target: x86_64-unknown-linux-gnu
+          - name: Windows
+            runner: windows-latest
+            rust-target: x86_64-pc-windows-msvc
+          - name: macOS
+            runner: macos-latest
+            rust-target: x86_64-apple-darwin
+
+    runs-on: ${{ matrix.platform.runner }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform.rust-target }}
+
+      - name: Install Linux dependencies
+        if: matrix.platform.name == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libwebkit2gtk-4.0-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Cache Node modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            src-tauri/target/
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-
+            ${{ runner.os }}-cargo-
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build Tauri app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: --target ${{ matrix.platform.rust-target }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-${{ matrix.platform.name }}
+          path: |
+            src-tauri/target/release/bundle/
+            src-tauri/target/${{ matrix.platform.rust-target }}/release/bundle/
+          retention-days: 7
+
+  # Security audit
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: NPM audit
+        run: npm audit --production
+        continue-on-error: true
+
+      - name: Cargo audit
+        uses: actions-rs/audit-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
