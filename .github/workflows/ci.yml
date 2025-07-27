@@ -166,7 +166,7 @@ jobs:
 
       - name: Upload coverage reports
         if: matrix.platform.name == 'Linux'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/coverage-final.json
