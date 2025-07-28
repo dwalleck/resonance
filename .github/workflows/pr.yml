@@ -69,12 +69,21 @@ jobs:
       - name: Comment on dependency changes
         if: steps.npm-changes.outputs.package == 'true' || steps.cargo-changes.outputs.cargo == 'true'
         uses: actions/github-script@v7
+        env:
+          NPM_CHANGED: ${{ steps.npm-changes.outputs.package }}
+          CARGO_CHANGED: ${{ steps.cargo-changes.outputs.cargo }}
         with:
           script: |
+            const npmChanged = process.env.NPM_CHANGED === 'true';
+            const cargoChanged = process.env.CARGO_CHANGED === 'true';
+
+            let changes = [];
+            if (npmChanged) changes.push('- NPM dependencies have been modified');
+            if (cargoChanged) changes.push('- Rust dependencies have been modified');
+
             const comment = `### 📦 Dependency Changes Detected
 
-            ${steps['npm-changes'].outputs.package === 'true' ? '- NPM dependencies have been modified' : ''}
-            ${steps['cargo-changes'].outputs.cargo === 'true' ? '- Rust dependencies have been modified' : ''}
+            ${changes.join('\n')}
 
             Please ensure:
             - [ ] Security audit has been run
