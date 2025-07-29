@@ -29,4 +29,4 @@ incremental = true
 
 [profile.release]
 incremental = true
-codegen-units = 256 # Increases parallelism at slight binary size cost
+codegen-units = 16 # Balanced parallelism without excessive overhead
