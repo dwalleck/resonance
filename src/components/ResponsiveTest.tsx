@@ -3,7 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 
 export function ResponsiveTest(): React.ReactElement {
   return (
-    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+    <div
+      className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+      data-testid="responsive-grid"
+    >
       <Card>
         <CardHeader>
           <CardTitle>Responsive Grid</CardTitle>
@@ -16,7 +19,7 @@ export function ResponsiveTest(): React.ReactElement {
         </CardContent>
       </Card>
 
-      <Card className="hidden sm:block">
+      <Card className="hidden sm:block" data-testid="tablet-card">
         <CardHeader>
           <CardTitle>Tablet & Desktop</CardTitle>
           <CardDescription>2 columns on tablet</CardDescription>
@@ -28,7 +31,7 @@ export function ResponsiveTest(): React.ReactElement {
         </CardContent>
       </Card>
 
-      <Card className="hidden lg:block">
+      <Card className="hidden lg:block" data-testid="desktop-card">
         <CardHeader>
           <CardTitle>Desktop Only</CardTitle>
           <CardDescription>3 columns on desktop</CardDescription>

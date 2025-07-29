@@ -50,7 +50,7 @@ export function testThemeSwitch(): {
   const initial = html.classList.contains('dark') ? 'dark' : 'light';
 
   // Find and click theme toggle
-  const themeToggle = document.querySelector('[aria-label*="Switch to"]') as HTMLButtonElement;
+  const themeToggle = document.querySelector('[data-testid="theme-toggle"]') as HTMLButtonElement;
 
   if (!themeToggle) {
     return { initial, afterToggle: initial, success: false };
@@ -71,13 +71,11 @@ export function testThemeSwitch(): {
 export function testResponsiveClasses(): Record<string, boolean> {
   const results: Record<string, boolean> = {};
 
-  // Check if responsive utility classes exist
+  // Check if responsive elements exist using data-testid
   const responsiveElements = {
-    'hidden sm:block': document.querySelector('.hidden.sm\\:block'),
-    'hidden lg:block': document.querySelector('.hidden.lg\\:block'),
-    'grid-cols-1': document.querySelector('.grid-cols-1'),
-    'sm:grid-cols-2': document.querySelector('.sm\\:grid-cols-2'),
-    'lg:grid-cols-3': document.querySelector('.lg\\:grid-cols-3'),
+    'responsive-grid': document.querySelector('[data-testid="responsive-grid"]'),
+    'tablet-card': document.querySelector('[data-testid="tablet-card"]'),
+    'desktop-card': document.querySelector('[data-testid="desktop-card"]'),
   };
 
   Object.entries(responsiveElements).forEach(([className, element]) => {

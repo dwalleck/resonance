@@ -30,7 +30,7 @@ export function TailwindTestResults(): React.ReactElement {
 
     // Switch back after 2 seconds
     setTimeout(() => {
-      const toggle = document.querySelector('[aria-label*="Switch to"]') as HTMLButtonElement;
+      const toggle = document.querySelector('[data-testid="theme-toggle"]') as HTMLButtonElement;
       if (toggle) {
         toggle.click();
       }
@@ -69,9 +69,9 @@ export function TailwindTestResults(): React.ReactElement {
 
       <Card>
         <CardHeader>
-          <CardTitle>Responsive Classes Test</CardTitle>
+          <CardTitle>Responsive Elements Test</CardTitle>
           <CardDescription>
-            {responsivePassed}/{responsiveTotal} responsive classes found
+            {responsivePassed}/{responsiveTotal} responsive elements found
           </CardDescription>
         </CardHeader>
         <CardContent>

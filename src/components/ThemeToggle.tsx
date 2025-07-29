@@ -42,6 +42,7 @@ export function ThemeToggle(): React.ReactElement {
       onClick={toggleTheme}
       className="h-9 w-9"
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      data-testid="theme-toggle"
     >
       {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
     </Button>

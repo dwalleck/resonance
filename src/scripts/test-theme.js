@@ -16,7 +16,7 @@ console.log('Background color:', bgColor);
 console.log('Foreground color:', fgColor);
 
 // Find and click theme toggle button
-const themeToggle = document.querySelector('[aria-label*="Switch to"]');
+const themeToggle = document.querySelector('[data-testid="theme-toggle"]');
 if (themeToggle) {
   console.log('Theme toggle button found');
   themeToggle.click();
