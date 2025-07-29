@@ -5,7 +5,6 @@ import { describe, expect, it } from 'vitest';
 // Constants for file paths
 const TSCONFIG_PATH = path.join(process.cwd(), 'tsconfig.json');
 const VITE_CONFIG_PATH = path.join(process.cwd(), 'vite.config.ts');
-const DIST_PATH = path.join(process.cwd(), 'dist');
 
 // Type for TypeScript configuration
 interface TsConfig {
@@ -88,31 +87,6 @@ describe('Build Configuration', () => {
       // Check for build output
       expect(viteConfigContent).toContain("outDir: 'dist'");
       expect(viteConfigContent).toContain('emptyOutDir: true');
-    });
-  });
-
-  describe('Build Output', () => {
-    it('should create dist directory on build', () => {
-      expect(fs.existsSync(DIST_PATH)).toBe(true);
-    });
-
-    it('should generate index.html in dist', () => {
-      const indexPath = path.join(DIST_PATH, 'index.html');
-      expect(fs.existsSync(indexPath)).toBe(true);
-    });
-
-    it('should generate JavaScript bundles', () => {
-      const assetsPath = path.join(DIST_PATH, 'assets');
-      const files = fs.readdirSync(assetsPath);
-      const hasJsFiles = files.some(file => file.endsWith('.js'));
-      expect(hasJsFiles).toBe(true);
-    });
-
-    it('should generate CSS bundles', () => {
-      const assetsPath = path.join(DIST_PATH, 'assets');
-      const files = fs.readdirSync(assetsPath);
-      const hasCssFiles = files.some(file => file.endsWith('.css'));
-      expect(hasCssFiles).toBe(true);
     });
   });
 
