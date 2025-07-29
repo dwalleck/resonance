@@ -18,7 +18,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
     "prepare": "husky install",
-    "postinstall": "node scripts/check-rust-tools.js"
+    "postinstall": "node scripts/check-rust-tools.cjs"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.7.1",
