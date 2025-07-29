@@ -8,7 +8,6 @@ on:
 
 env:
   RUST_BACKTRACE: 1
-  CARGO_BUILD_JOBS: 2 # Optimize for GitHub's 2-CPU runners
 
 jobs:
   # Check formatting first (fast fail)

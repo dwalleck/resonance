@@ -26,7 +26,3 @@ tauri-plugin-log = "2"
 
 [profile.dev]
 incremental = true
-
-[profile.release]
-incremental = true
-codegen-units = 16 # Balanced parallelism without excessive overhead
