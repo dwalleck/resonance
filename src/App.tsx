@@ -9,6 +9,7 @@ import { Input } from './components/ui/input';
 import { UIComponentsTest } from './components/UIComponentsTest';
 
 function App(): React.ReactElement {
+  // Test comment for pre-commit hook
   const [greetMsg, setGreetMsg] = useState('');
   const [name, setName] = useState('');
 
