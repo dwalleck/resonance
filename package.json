@@ -17,6 +17,10 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
+    "test:rust": "cd src-tauri && cargo test",
+    "test:rust:coverage": "cd src-tauri && cargo tarpaulin --out Xml --output-dir ../coverage",
+    "test:all": "npm run test -- --run && npm run test:rust",
+    "test:all:coverage": "npm run test:coverage && npm run test:rust:coverage",
     "prepare": "husky install",
     "postinstall": "node scripts/check-rust-tools.cjs"
   },
