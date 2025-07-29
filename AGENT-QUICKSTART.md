@@ -132,7 +132,10 @@ gh issue comment <issue-number> --body "Progress update:
 - Blockers: [any issues]"
 
 # 4. If task is complete, create PR
-gh pr create --title "[Task #<issue-number>] <Description>" \
+# IMPORTANT: PR title must follow conventional commit format!
+# Format: <type>: <description>
+# Types: feat, fix, docs, style, refactor, perf, test, chore, build, ci, revert
+gh pr create --title "<type>: <description>" \
              --body "Closes #<issue-number>
 
 ## Changes
@@ -145,7 +148,43 @@ gh pr create --title "[Task #<issue-number>] <Description>" \
 
 ## Checklist
 [Copy acceptance criteria from issue]"
+
+# Example PR titles:
+# feat: add power monitoring dashboard
+# fix: resolve memory leak in monitoring loop
+# docs: update installation instructions
+# build: configure TypeScript strict mode
+# test: add integration tests for FFI bindings
 ```
+
+## 📝 Conventional Commits & PR Titles
+
+**IMPORTANT**: All PR titles must follow the conventional commit format to pass
+CI validation.
+
+### Format: `<type>: <description>`
+
+### Commit Types:
+
+- **feat**: New feature (e.g., `feat: add power monitoring dashboard`)
+- **fix**: Bug fix (e.g., `fix: resolve memory leak in monitoring`)
+- **docs**: Documentation changes (e.g., `docs: update API reference`)
+- **style**: Code style changes (formatting, missing semicolons, etc.)
+- **refactor**: Code refactoring without changing functionality
+- **perf**: Performance improvements
+- **test**: Adding or updating tests
+- **chore**: Maintenance tasks (e.g., `chore: update dependencies`)
+- **build**: Build system changes (e.g., `build: configure webpack`)
+- **ci**: CI/CD changes (e.g., `ci: add test coverage reporting`)
+- **revert**: Reverting a previous commit
+
+### Examples:
+
+- ✅ `feat: implement real-time power monitoring`
+- ✅ `fix: handle missing privileges gracefully`
+- ✅ `build: setup TypeScript strict mode configuration`
+- ❌ `[Task #4] Setup Build Tools` (missing type prefix)
+- ❌ `Updated tests` (missing type prefix and not descriptive)
 
 ## 🏷️ GitHub Label System
 

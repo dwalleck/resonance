@@ -1,7 +1,8 @@
 {
   "*.{ts,tsx,js,jsx}": [
     "eslint --fix --max-warnings 0",
-    "dprint fmt"
+    "dprint fmt",
+    "bash -c 'npm run type-check'"
   ],
   "*.rs": [
     "rustfmt --edition 2021"
