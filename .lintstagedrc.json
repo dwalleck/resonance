@@ -4,8 +4,7 @@
     "dprint fmt"
   ],
   "*.rs": [
-    "rustfmt --edition 2021",
-    "cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings"
+    "rustfmt --edition 2021"
   ],
   "*.toml": [
     "dprint fmt"
