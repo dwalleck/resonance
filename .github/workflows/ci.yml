@@ -106,9 +106,6 @@ jobs:
           - name: Windows
             runner: windows-latest
             rust-target: x86_64-pc-windows-msvc
-          - name: macOS
-            runner: macos-latest
-            rust-target: x86_64-apple-darwin
 
     runs-on: ${{ matrix.platform.runner }}
 
@@ -197,9 +194,6 @@ jobs:
           - name: Windows
             runner: windows-latest
             rust-target: x86_64-pc-windows-msvc
-          - name: macOS
-            runner: macos-latest
-            rust-target: x86_64-apple-darwin
 
     runs-on: ${{ matrix.platform.runner }}
 
