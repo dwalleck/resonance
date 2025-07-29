@@ -9,7 +9,10 @@
   "*.toml": [
     "dprint fmt"
   ],
-  "*.{json,md,yml,yaml}": [
+  "!(package-lock).json": [
+    "dprint fmt"
+  ],
+  "*.{md,yml,yaml}": [
     "dprint fmt"
   ],
   "*.{css,scss}": [

@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import React, { useState } from 'react';
 import './App.css';
+import { UIComponentsTest } from './components/UIComponentsTest';
 
 function App(): React.ReactElement {
   const [greetMsg, setGreetMsg] = useState('');
@@ -31,6 +32,11 @@ function App(): React.ReactElement {
         <button type="submit">Greet</button>
       </form>
       <p>{greetMsg}</p>
+
+      <div style={{ marginTop: '2rem' }}>
+        <h2>UI Components Test</h2>
+        <UIComponentsTest />
+      </div>
     </main>
   );
 }

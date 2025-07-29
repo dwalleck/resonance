@@ -249,15 +249,13 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Build frontend
-        run: npm run build
-
       - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: --target ${{ matrix.platform.rust-target }}
+        run: |
+          cd src-tauri
+          cargo build --release --target ${{ matrix.platform.rust-target }}
+
+      - name: Build installers
+        run: npm run tauri build -- --target ${{ matrix.platform.rust-target }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
