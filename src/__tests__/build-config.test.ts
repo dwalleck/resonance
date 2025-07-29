@@ -2,42 +2,61 @@ import fs from 'fs';
 import path from 'path';
 import { describe, expect, it } from 'vitest';
 
+// Constants for file paths
+const TSCONFIG_PATH = path.join(process.cwd(), 'tsconfig.json');
+const VITE_CONFIG_PATH = path.join(process.cwd(), 'vite.config.ts');
+const DIST_PATH = path.join(process.cwd(), 'dist');
+
+// Type for TypeScript configuration
+interface TsConfig {
+  compilerOptions: {
+    strict: boolean;
+    paths?: Record<string, string[]>;
+    baseUrl?: string;
+    target: string;
+    jsx: string;
+    noUnusedLocals: boolean;
+    noUnusedParameters: boolean;
+  };
+}
+
+// Cache parsed configurations to avoid repeated file I/O
+const getTsConfig = (() => {
+  let cached: TsConfig | null = null;
+  return (): TsConfig => {
+    if (!cached) {
+      cached = JSON.parse(fs.readFileSync(TSCONFIG_PATH, 'utf-8')) as TsConfig;
+    }
+    return cached;
+  };
+})();
+
 describe('Build Configuration', () => {
   describe('TypeScript Configuration', () => {
     it('should have TypeScript strict mode enabled', () => {
-      const tsconfigPath = path.join(process.cwd(), 'tsconfig.json');
-      const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf-8'));
-
+      const tsconfig = getTsConfig();
       expect(tsconfig.compilerOptions.strict).toBe(true);
     });
 
     it('should have proper path aliases configured', () => {
-      const tsconfigPath = path.join(process.cwd(), 'tsconfig.json');
-      const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf-8'));
-
+      const tsconfig = getTsConfig();
       expect(tsconfig.compilerOptions.paths).toBeDefined();
-      expect(tsconfig.compilerOptions.paths['@/*']).toEqual(['./src/*']);
+      expect(tsconfig.compilerOptions.paths?.['@/*']).toEqual(['./src/*']);
       expect(tsconfig.compilerOptions.baseUrl).toBe('.');
     });
 
     it('should target ES2020', () => {
-      const tsconfigPath = path.join(process.cwd(), 'tsconfig.json');
-      const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf-8'));
-
+      const tsconfig = getTsConfig();
       expect(tsconfig.compilerOptions.target).toBe('ES2020');
     });
 
     it('should use react-jsx for JSX transform', () => {
-      const tsconfigPath = path.join(process.cwd(), 'tsconfig.json');
-      const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf-8'));
-
+      const tsconfig = getTsConfig();
       expect(tsconfig.compilerOptions.jsx).toBe('react-jsx');
     });
 
     it('should have noUnusedLocals and noUnusedParameters enabled', () => {
-      const tsconfigPath = path.join(process.cwd(), 'tsconfig.json');
-      const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf-8'));
-
+      const tsconfig = getTsConfig();
       expect(tsconfig.compilerOptions.noUnusedLocals).toBe(true);
       expect(tsconfig.compilerOptions.noUnusedParameters).toBe(true);
     });
@@ -45,13 +64,11 @@ describe('Build Configuration', () => {
 
   describe('Vite Configuration', () => {
     it('should have vite config file', () => {
-      const viteConfigPath = path.join(process.cwd(), 'vite.config.ts');
-      expect(fs.existsSync(viteConfigPath)).toBe(true);
+      expect(fs.existsSync(VITE_CONFIG_PATH)).toBe(true);
     });
 
     it('should contain correct Vite configuration', () => {
-      const viteConfigPath = path.join(process.cwd(), 'vite.config.ts');
-      const viteConfigContent = fs.readFileSync(viteConfigPath, 'utf-8');
+      const viteConfigContent = fs.readFileSync(VITE_CONFIG_PATH, 'utf-8');
 
       // Check for React plugin
       expect(viteConfigContent).toContain('@vitejs/plugin-react');
@@ -76,25 +93,24 @@ describe('Build Configuration', () => {
 
   describe('Build Output', () => {
     it('should create dist directory on build', () => {
-      const distPath = path.join(process.cwd(), 'dist');
-      expect(fs.existsSync(distPath)).toBe(true);
+      expect(fs.existsSync(DIST_PATH)).toBe(true);
     });
 
     it('should generate index.html in dist', () => {
-      const indexPath = path.join(process.cwd(), 'dist', 'index.html');
+      const indexPath = path.join(DIST_PATH, 'index.html');
       expect(fs.existsSync(indexPath)).toBe(true);
     });
 
     it('should generate JavaScript bundles', () => {
-      const distPath = path.join(process.cwd(), 'dist', 'assets');
-      const files = fs.readdirSync(distPath);
+      const assetsPath = path.join(DIST_PATH, 'assets');
+      const files = fs.readdirSync(assetsPath);
       const hasJsFiles = files.some(file => file.endsWith('.js'));
       expect(hasJsFiles).toBe(true);
     });
 
     it('should generate CSS bundles', () => {
-      const distPath = path.join(process.cwd(), 'dist', 'assets');
-      const files = fs.readdirSync(distPath);
+      const assetsPath = path.join(DIST_PATH, 'assets');
+      const files = fs.readdirSync(assetsPath);
       const hasCssFiles = files.some(file => file.endsWith('.css'));
       expect(hasCssFiles).toBe(true);
     });
@@ -104,8 +120,13 @@ describe('Build Configuration', () => {
     it('should resolve @ alias imports', async () => {
       // This test verifies that TypeScript can resolve @ imports
       const canImport = async (): Promise<boolean> => {
-        const module = await import('@/App');
-        return module.default !== undefined;
+        try {
+          const module = await import('@/App');
+          return module.default !== undefined;
+        } catch (error) {
+          console.error('Failed to import @/App:', error);
+          return false;
+        }
       };
 
       await expect(canImport()).resolves.toBe(true);
