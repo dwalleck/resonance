@@ -69,7 +69,7 @@ jobs:
             patchelf
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit
 
       - name: Lint TypeScript
         run: npm run lint
@@ -159,7 +159,7 @@ jobs:
             ${{ runner.os }}-cargo-
 
       - name: Install npm dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit
 
       - name: Run frontend tests
         run: npm test -- --run
@@ -246,8 +246,14 @@ jobs:
             ${{ runner.os }}-cargo-build-
             ${{ runner.os }}-cargo-
 
+      - name: Cache build output
+        uses: actions/cache@v4
+        with:
+          path: dist
+          key: ${{ runner.os }}-dist-${{ hashFiles('src/**', 'package-lock.json', 'vite.config.ts') }}
+
       - name: Install npm dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit
 
       - name: Build Tauri app
         run: |
@@ -255,6 +261,9 @@ jobs:
           cargo build --release --target ${{ matrix.platform.rust-target }}
 
       - name: Build installers
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ""
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
         run: npm run tauri build -- --target ${{ matrix.platform.rust-target }}
 
       - name: Upload artifacts
