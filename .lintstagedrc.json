@@ -5,7 +5,8 @@
     "bash -c 'npm run type-check'"
   ],
   "*.rs": [
-    "rustfmt --edition 2021"
+    "rustfmt --edition 2021",
+    "bash -c 'cd src-tauri && cargo clippy -- -D warnings'"
   ],
   "*.toml": [
     "dprint fmt"

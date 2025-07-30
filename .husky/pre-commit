@@ -2,3 +2,14 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 npx lint-staged
+
+# Run tests if available
+if [ -f "package.json" ]; then
+  echo "Running frontend tests..."
+  npm run test -- --run
+fi
+
+if [ -d "src-tauri" ]; then
+  echo "Running Rust tests..."
+  (cd src-tauri && cargo test)
+fi
