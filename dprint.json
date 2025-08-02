@@ -55,7 +55,8 @@
     "**/*.min.js",
     "**/package-lock.json",
     "**/bun.lockb",
-    "**/Cargo.lock"
+    "**/Cargo.lock",
+    "**/src-tauri/RyzenAdj/**"
   ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.88.0.wasm",
