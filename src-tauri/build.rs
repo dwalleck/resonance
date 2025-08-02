@@ -40,21 +40,55 @@ fn main() {
             panic!("cmake failed to configure RyzenAdj");
         }
 
-        // Run make
-        let make_status = Command::new("make")
+        // Run cmake --build . --parallel
+        let build_status = Command::new("cmake")
             .current_dir(&build_path)
-            .arg("-j")
+            .arg("--build")
+            .arg(".")
+            .arg("--parallel")
             .status()
-            .expect("Failed to run make");
+            .expect("Failed to run cmake --build");
 
-        if !make_status.success() {
-            panic!("make failed to build RyzenAdj");
+        if !build_status.success() {
+            panic!("cmake --build failed to build RyzenAdj");
         }
     }
 
     // Link to the RyzenAdj library
     println!("cargo:rustc-link-search=native={}", build_path.display());
-    println!("cargo:rustc-link-lib=dylib=ryzenadj");
+
+    // Conditionally link to the correct library type
+    if cfg!(target_os = "windows") {
+        let dyn_lib = build_path.join("ryzenadj.dll");
+        let static_lib = build_path.join("ryzenadj.lib");
+        if dyn_lib.exists() {
+            println!("cargo:rustc-link-lib=dylib=ryzenadj");
+        } else if static_lib.exists() {
+            println!("cargo:rustc-link-lib=static=ryzenadj");
+        } else {
+            panic!("No RyzenAdj library found to link against");
+        }
+    } else if cfg!(target_os = "macos") {
+        let dyn_lib = build_path.join("libryzenadj.dylib");
+        let static_lib = build_path.join("libryzenadj.a");
+        if dyn_lib.exists() {
+            println!("cargo:rustc-link-lib=dylib=ryzenadj");
+        } else if static_lib.exists() {
+            println!("cargo:rustc-link-lib=static=ryzenadj");
+        } else {
+            panic!("No RyzenAdj library found to link against");
+        }
+    } else {
+        let dyn_lib = build_path.join("libryzenadj.so");
+        let static_lib = build_path.join("libryzenadj.a");
+        if dyn_lib.exists() {
+            println!("cargo:rustc-link-lib=dylib=ryzenadj");
+        } else if static_lib.exists() {
+            println!("cargo:rustc-link-lib=static=ryzenadj");
+        } else {
+            panic!("No RyzenAdj library found to link against");
+        }
+    }
 
     // On Linux, we also need to link to libpci
     #[cfg(target_os = "linux")]

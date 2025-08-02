@@ -169,32 +169,41 @@ mod tests {
         }
     }
 
-    static MOCK: Mutex<Option<MockRyzenAdj>> = Mutex::new(None);
+    thread_local! {
+        static MOCK: Mutex<Option<MockRyzenAdj>> = Mutex::new(None);
+    }
 
     // Mock implementations of the C functions for testing
     #[no_mangle]
     extern "C" fn mock_init_ryzenadj() -> *mut RyzenAccess {
-        let mut mock = MOCK.lock().unwrap();
-        *mock = Some(MockRyzenAdj {
-            initialized: true,
-            cpu_family: RyzenFamily::Phoenix,
-            stapm_limit: 25000.0,
-            fast_limit: 30000.0,
-            slow_limit: 25000.0,
-            tctl_temp: 95.0,
-            socket_power: 15.5,
-            vrm_current: 45.0,
+        MOCK.with(|mock_mutex| {
+            let mut mock = mock_mutex.lock().unwrap();
+            *mock = Some(MockRyzenAdj {
+                initialized: true,
+                cpu_family: RyzenFamily::Phoenix,
+                stapm_limit: 25000.0,
+                fast_limit: 30000.0,
+                slow_limit: 25000.0,
+                tctl_temp: 95.0,
+                socket_power: 15.5,
+                vrm_current: 45.0,
+            });
         });
         // Return a non-null pointer for testing
+        // NonNull::dangling() creates a well-aligned dangling pointer that is guaranteed
+        // to never be dereferenced. This is the safest way to create a non-null pointer
+        // for testing FFI functions that only check for null pointers.
         NonNull::dangling().as_ptr()
     }
 
     #[no_mangle]
     extern "C" fn mock_cleanup_ryzenadj(_ry: *mut RyzenAccess) {
-        let mut mock = MOCK.lock().unwrap();
-        if let Some(ref mut m) = *mock {
-            m.initialized = false;
-        }
+        MOCK.with(|mock_mutex| {
+            let mut mock = mock_mutex.lock().unwrap();
+            if let Some(ref mut m) = *mock {
+                m.initialized = false;
+            }
+        });
     }
 
     #[no_mangle]
@@ -202,16 +211,20 @@ mod tests {
         if ry.is_null() {
             return RyzenFamily::Unknown;
         }
-        let mock = MOCK.lock().unwrap();
-        mock.as_ref()
-            .map(|m| m.cpu_family)
-            .unwrap_or(RyzenFamily::Unknown)
+        MOCK.with(|mock_mutex| {
+            let mock = mock_mutex.lock().unwrap();
+            mock.as_ref()
+                .map(|m| m.cpu_family)
+                .unwrap_or(RyzenFamily::Unknown)
+        })
     }
 
     #[no_mangle]
     extern "C" fn mock_get_stapm_limit(_ry: *mut RyzenAccess) -> c_float {
-        let mock = MOCK.lock().unwrap();
-        mock.as_ref().map(|m| m.stapm_limit).unwrap_or(0.0)
+        MOCK.with(|mock_mutex| {
+            let mock = mock_mutex.lock().unwrap();
+            mock.as_ref().map(|m| m.stapm_limit).unwrap_or(0.0)
+        })
     }
 
     #[no_mangle]
@@ -219,18 +232,22 @@ mod tests {
         if ry.is_null() {
             return -1; // Error
         }
-        let mut mock = MOCK.lock().unwrap();
-        if let Some(ref mut m) = *mock {
-            m.stapm_limit = value as f32;
-            return 0; // Success
-        }
-        -1 // Error
+        MOCK.with(|mock_mutex| {
+            let mut mock = mock_mutex.lock().unwrap();
+            if let Some(ref mut m) = *mock {
+                m.stapm_limit = value as f32;
+                return 0; // Success
+            }
+            -1 // Error
+        })
     }
 
     #[no_mangle]
     extern "C" fn mock_get_socket_power(_ry: *mut RyzenAccess) -> c_float {
-        let mock = MOCK.lock().unwrap();
-        mock.as_ref().map(|m| m.socket_power).unwrap_or(0.0)
+        MOCK.with(|mock_mutex| {
+            let mock = mock_mutex.lock().unwrap();
+            mock.as_ref().map(|m| m.socket_power).unwrap_or(0.0)
+        })
     }
 
     #[test]
@@ -241,19 +258,19 @@ mod tests {
             assert!(!handle.is_null());
 
             // Verify mock was initialized
-            {
-                let mock = MOCK.lock().unwrap();
+            MOCK.with(|mock_mutex| {
+                let mock = mock_mutex.lock().unwrap();
                 assert!(mock.as_ref().unwrap().initialized);
-            }
+            });
 
             // Test cleanup
             super::mock_ffi::mock_cleanup_ryzenadj(handle);
 
             // Verify mock was cleaned up
-            {
-                let mock = MOCK.lock().unwrap();
+            MOCK.with(|mock_mutex| {
+                let mock = mock_mutex.lock().unwrap();
                 assert!(!mock.as_ref().unwrap().initialized);
-            }
+            });
         }
     }
 
