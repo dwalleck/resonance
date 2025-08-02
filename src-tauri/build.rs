@@ -16,7 +16,13 @@ fn main() {
 
     // Check if RyzenAdj is already built
     let lib_built = if cfg!(target_os = "windows") {
-        build_path.join("ryzenadj.dll").exists() || build_path.join("ryzenadj.lib").exists()
+        // Check in main build directory and Debug/Release subdirectories
+        build_path.join("ryzenadj.dll").exists()
+            || build_path.join("ryzenadj.lib").exists()
+            || build_path.join("Debug").join("libryzenadj.dll").exists()
+            || build_path.join("Debug").join("libryzenadj.lib").exists()
+            || build_path.join("Release").join("libryzenadj.dll").exists()
+            || build_path.join("Release").join("libryzenadj.lib").exists()
     } else if cfg!(target_os = "macos") {
         build_path.join("libryzenadj.dylib").exists() || build_path.join("libryzenadj.a").exists()
     } else {
@@ -59,13 +65,51 @@ fn main() {
 
     // Conditionally link to the correct library type
     if cfg!(target_os = "windows") {
+        // On Windows, CMake may create Debug/Release subdirectories
+        let mut found = false;
+
+        // Check in build_path directly first
         let dyn_lib = build_path.join("ryzenadj.dll");
         let static_lib = build_path.join("ryzenadj.lib");
         if dyn_lib.exists() {
             println!("cargo:rustc-link-lib=dylib=ryzenadj");
+            found = true;
         } else if static_lib.exists() {
             println!("cargo:rustc-link-lib=static=ryzenadj");
-        } else {
+            found = true;
+        }
+
+        // If not found, check in Debug subdirectory
+        if !found {
+            let debug_path = build_path.join("Debug");
+            println!("cargo:rustc-link-search=native={}", debug_path.display());
+            let dyn_lib = debug_path.join("libryzenadj.dll");
+            let static_lib = debug_path.join("libryzenadj.lib");
+            if dyn_lib.exists() {
+                println!("cargo:rustc-link-lib=dylib=libryzenadj");
+                found = true;
+            } else if static_lib.exists() {
+                println!("cargo:rustc-link-lib=static=libryzenadj");
+                found = true;
+            }
+        }
+
+        // If still not found, check in Release subdirectory
+        if !found {
+            let release_path = build_path.join("Release");
+            println!("cargo:rustc-link-search=native={}", release_path.display());
+            let dyn_lib = release_path.join("libryzenadj.dll");
+            let static_lib = release_path.join("libryzenadj.lib");
+            if dyn_lib.exists() {
+                println!("cargo:rustc-link-lib=dylib=libryzenadj");
+                found = true;
+            } else if static_lib.exists() {
+                println!("cargo:rustc-link-lib=static=libryzenadj");
+                found = true;
+            }
+        }
+
+        if !found {
             panic!("No RyzenAdj library found to link against");
         }
     } else if cfg!(target_os = "macos") {
