@@ -138,7 +138,7 @@ mod mock_ffi {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::ptr;
+    use std::ptr::{self, NonNull};
     use std::sync::Mutex;
 
     // Mock implementation for testing
@@ -186,7 +186,7 @@ mod tests {
             vrm_current: 45.0,
         });
         // Return a non-null pointer for testing
-        0x1 as *mut RyzenAccess
+        NonNull::dangling().as_ptr()
     }
 
     #[no_mangle]

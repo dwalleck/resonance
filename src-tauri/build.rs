@@ -8,7 +8,6 @@ fn main() {
     // Configure mobile cfg
     println!("cargo::rustc-check-cfg=cfg(mobile)");
 
-    let _out_dir = env::var("OUT_DIR").unwrap();
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
 
     // Path to RyzenAdj submodule
@@ -16,7 +15,14 @@ fn main() {
     let build_path = ryzenadj_path.join("build");
 
     // Check if RyzenAdj is already built
-    if !build_path.join("libryzenadj.so").exists() && !build_path.join("libryzenadj.a").exists() {
+    let lib_built = if cfg!(target_os = "windows") {
+        build_path.join("ryzenadj.dll").exists() || build_path.join("ryzenadj.lib").exists()
+    } else if cfg!(target_os = "macos") {
+        build_path.join("libryzenadj.dylib").exists() || build_path.join("libryzenadj.a").exists()
+    } else {
+        build_path.join("libryzenadj.so").exists() || build_path.join("libryzenadj.a").exists()
+    };
+    if !lib_built {
         // Build RyzenAdj if not already built
         println!("Building RyzenAdj library...");
 
